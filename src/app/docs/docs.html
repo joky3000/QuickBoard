@@ -1,0 +1,184 @@
+<div class="min-h-screen text-qb-text">
+
+  <header class="px-6 py-3 flex items-center justify-between qb-header">
+    <span class="text-lg font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+      QuickBoard
+    </span>
+    <div class="w-32">
+      <a routerLink="/login">
+        <app-cyber-button>Login</app-cyber-button>
+      </a>
+    </div>
+  </header>
+
+  <div class="px-6 py-10 max-w-7xl mx-auto">
+
+    <!-- Top row: 3 cols on medium screens and up -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+
+        <!-- Hero -->
+        <section class="rounded-2xl p-8 qb-surface">
+          <h2 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-3">
+            What is QuickBoard?
+          </h2>
+          <p class="text-sm leading-relaxed text-qb-text">
+            QuickBoard is a lightweight Jira dashboard that aggregates tasks from
+            multiple projects and sprints into a single, unified view. Instead of
+            switching between boards, QuickBoard pulls everything into one place so
+            you can filter, sort, and focus on what matters — without ever leaving
+            your browser.
+          </p>
+          <ul class="mt-4 flex flex-col gap-2">
+            <li class="flex items-start gap-2 text-sm text-qb-text">
+              <span class="mt-0.5 shrink-0 text-cyan-400">&#10003;</span>
+              Aggregate issues across multiple Jira projects and active sprints
+            </li>
+            <li class="flex items-start gap-2 text-sm text-qb-text">
+              <span class="mt-0.5 shrink-0 text-cyan-400">&#10003;</span>
+              Switch between a filterable table view and a kanban board
+            </li>
+            <li class="flex items-start gap-2 text-sm text-qb-text">
+              <span class="mt-0.5 shrink-0 text-cyan-400">&#10003;</span>
+              Filter by status, assignee, priority, and more in real time
+            </li>
+            <li class="flex items-start gap-2 text-sm text-qb-text">
+              <span class="mt-0.5 shrink-0 text-cyan-400">&#10003;</span>
+              No backend account required — your credentials stay on your device
+            </li>
+          </ul>
+        </section>
+
+        <!-- How it works -->
+        <section class="rounded-2xl p-8 qb-surface">
+          <h2 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-6">
+            How it works
+          </h2>
+          <ol class="flex flex-col gap-6">
+
+            <li class="flex gap-4">
+              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white qb-badge">1</span>
+              <div>
+                <p class="text-sm font-semibold mb-1 text-qb-text">Enter your credentials</p>
+                <p class="text-sm text-qb-muted">
+                  Provide your Atlassian email, a personal API token, and your
+                  Jira base URL (e.g. <span class="text-qb-cyan">https://yoursite.atlassian.net</span>).
+                  These are saved only in your browser's localStorage.
+                </p>
+              </div>
+            </li>
+
+            <li class="flex gap-4">
+              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white qb-badge">2</span>
+              <div>
+                <p class="text-sm font-semibold mb-1 text-qb-text">QuickBoard connects to Jira</p>
+                <p class="text-sm text-qb-muted">
+                  Requests are sent through a local proxy to the Jira REST API.
+                  QuickBoard fetches your active sprints and all issues across the
+                  projects you have access to.
+                </p>
+              </div>
+            </li>
+
+            <li class="flex gap-4">
+              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white qb-badge">3</span>
+              <div>
+                <p class="text-sm font-semibold mb-1 text-qb-text">Tasks appear in your dashboard</p>
+                <p class="text-sm text-qb-muted">
+                  All issues are loaded into a unified table and kanban board.
+                  Use the filter bar to narrow down by project, sprint, status,
+                  assignee, or priority — and switch views with one click.
+                </p>
+              </div>
+            </li>
+
+          </ol>
+        </section>
+
+        <!-- Getting your API token -->
+        <section class="rounded-2xl p-8 qb-surface">
+          <h2 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-3">
+            Getting your API token
+          </h2>
+          <p class="text-sm mb-5 text-qb-muted">
+            QuickBoard authenticates with the Jira REST API using a personal API
+            token linked to your Atlassian account. Follow these steps to create one:
+          </p>
+          <ol class="flex flex-col gap-4">
+
+            <li class="flex gap-3 text-sm text-qb-text">
+              <span class="shrink-0 font-semibold text-qb-accent-glow">01</span>
+              <span>
+                Open
+                <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener noreferrer"
+                  class="underline underline-offset-2 transition-colors text-qb-cyan hover:text-qb-accent-glow"
+                >id.atlassian.com/manage-profile/security/api-tokens</a>
+                and sign in with your Atlassian account.
+              </span>
+            </li>
+
+            <li class="flex gap-3 text-sm text-qb-text">
+              <span class="shrink-0 font-semibold text-qb-accent-glow">02</span>
+              <span>
+                Click <span class="font-semibold text-qb-text">Create API token</span>,
+                give it a descriptive label (e.g. "QuickBoard"), and confirm.
+              </span>
+            </li>
+
+            <li class="flex gap-3 text-sm text-qb-text">
+              <span class="shrink-0 font-semibold text-qb-accent-glow">03</span>
+              <span>
+                Copy the generated token — it is shown only once. Paste it into the
+                <span class="font-semibold text-qb-text">API Token</span> field on the login page.
+              </span>
+            </li>
+
+          </ol>
+          <div class="mt-5 rounded-lg px-4 py-3 text-xs qb-tip">
+            <span class="font-semibold text-qb-cyan">Tip:</span>
+            Your API token has the same permissions as your Atlassian account.
+            Only create tokens for tools you trust, and revoke them at any time from the same page.
+          </div>
+        </section>
+
+    </div>
+
+    <!-- Bottom row: Privacy full width -->
+    <div class="flex flex-col gap-6 mt-6">
+
+      <!-- Privacy -->
+      <section class="rounded-2xl p-8 qb-surface">
+        <h2 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-3">
+          Privacy
+        </h2>
+        <p class="text-sm leading-relaxed mb-4 text-qb-text">
+          QuickBoard is built with a local-first approach. Your credentials are
+          never transmitted to any server other than Jira itself.
+        </p>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <li class="flex items-start gap-2 text-sm text-qb-muted">
+            <span class="mt-0.5 shrink-0 text-qb-accent-glow">&#9632;</span>
+            <span>Your email, API token, and base URL are stored exclusively in
+            <span class="font-medium text-qb-text">your browser's localStorage</span>.
+            They never leave your device in any other way.</span>
+          </li>
+          <li class="flex items-start gap-2 text-sm text-qb-muted">
+            <span class="mt-0.5 shrink-0 text-qb-accent-glow">&#9632;</span>
+            <span>All calls to the Jira API are routed through a
+            <span class="font-medium text-qb-text">local proxy</span>
+            running on your machine, not a remote QuickBoard server.</span>
+          </li>
+          <li class="flex items-start gap-2 text-sm text-qb-muted">
+            <span class="mt-0.5 shrink-0 text-qb-accent-glow">&#9632;</span>
+            <span>QuickBoard has no analytics, telemetry, or external dependencies beyond the Jira API.</span>
+          </li>
+          <li class="flex items-start gap-2 text-sm text-qb-muted">
+            <span class="mt-0.5 shrink-0 text-qb-accent-glow">&#9632;</span>
+            <span>You can clear your credentials at any time by logging out, which removes all entries from localStorage.</span>
+          </li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,412 @@
+<div class="min-h-screen text-qb-text">
+
+  <header class="px-6 py-3 flex items-center justify-between qb-header">
+    <span class="text-lg font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+      QuickBoard
+    </span>
+    <button (click)="logout()" class="text-sm text-white hover:underline">Logout</button>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="px-4 py-2.5 flex items-center gap-3 flex-wrap border-b border-qb-border qb-surface">
+
+    <!-- Search -->
+    <div class="relative flex-1 min-w-48 max-w-72">
+      <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-qb-muted pointer-events-none"
+        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search issues…"
+        class="input-cyber w-full rounded pl-8 pr-3 py-1.5 text-sm"
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+      />
+    </div>
+
+    <!-- Filter: Sprint -->
+    <div class="relative">
+      <button
+        (click)="showSprintMenu.update(v => !v)"
+        class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
+        [class.border-purple-500]="filterSprints().size > 0"
+      >
+        {{ filterLabel(filterSprints, 'Sprint') }}
+        <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+      @if (showSprintMenu()) {
+        <div class="fixed inset-0 z-20" (click)="showSprintMenu.set(false)"></div>
+        <div class="absolute top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-44 py-1 border border-qb-border max-h-64 overflow-y-auto">
+          @for (s of sprints(); track s.id) {
+            <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
+              <input type="checkbox" [checked]="filterSprints().has(s.name)" (change)="toggleFilter(filterSprints, s.name)" class="accent-purple-500 w-3.5 h-3.5" />
+              {{ s.name }}
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Filter: Type -->
+    <div class="relative">
+      <button
+        (click)="showTypeMenu.update(v => !v)"
+        class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
+        [class.border-purple-500]="filterIssueTypes().size > 0"
+      >
+        {{ filterLabel(filterIssueTypes, 'Type') }}
+        <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+      @if (showTypeMenu()) {
+        <div class="fixed inset-0 z-20" (click)="showTypeMenu.set(false)"></div>
+        <div class="absolute top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-44 py-1 border border-qb-border max-h-64 overflow-y-auto">
+          @for (t of uniqueIssueTypes(); track t) {
+            <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
+              <input type="checkbox" [checked]="filterIssueTypes().has(t)" (change)="toggleFilter(filterIssueTypes, t)" class="accent-purple-500 w-3.5 h-3.5" />
+              {{ t }}
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Filter: Priority -->
+    <div class="relative">
+      <button
+        (click)="showPriorityMenu.update(v => !v)"
+        class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
+        [class.border-purple-500]="filterPriorities().size > 0"
+      >
+        {{ filterLabel(filterPriorities, 'Priority') }}
+        <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+      @if (showPriorityMenu()) {
+        <div class="fixed inset-0 z-20" (click)="showPriorityMenu.set(false)"></div>
+        <div class="absolute top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-44 py-1 border border-qb-border max-h-64 overflow-y-auto">
+          @for (p of uniquePriorities(); track p) {
+            <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
+              <input type="checkbox" [checked]="filterPriorities().has(p)" (change)="toggleFilter(filterPriorities, p)" class="accent-purple-500 w-3.5 h-3.5" />
+              {{ p }}
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Filter: Status -->
+    <div class="relative">
+      <button
+        (click)="showStatusMenu.update(v => !v)"
+        class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
+        [class.border-purple-500]="filterStatuses().size > 0"
+      >
+        {{ filterLabel(filterStatuses, 'Status') }}
+        <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+      @if (showStatusMenu()) {
+        <div class="fixed inset-0 z-20" (click)="showStatusMenu.set(false)"></div>
+        <div class="absolute top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-44 py-1 border border-qb-border max-h-64 overflow-y-auto">
+          @for (s of uniqueStatuses(); track s) {
+            <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
+              <input type="checkbox" [checked]="filterStatuses().has(s)" (change)="toggleFilter(filterStatuses, s)" class="accent-purple-500 w-3.5 h-3.5" />
+              {{ s }}
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+    @if (hasActiveFilters()) {
+      <button
+        (click)="clearFilters()"
+        class="text-xs text-qb-muted hover:text-qb-text transition-colors underline underline-offset-2"
+      >
+        Clear filters
+      </button>
+    }
+
+    <span class="text-xs text-qb-muted ml-auto">{{ filteredIssues().length }} issues</span>
+
+    <!-- Columns dropdown -->
+    <div class="relative">
+      <button
+        (click)="showColumnsMenu.update(v => !v)"
+        class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
+        </svg>
+        Columns
+      </button>
+
+      @if (showColumnsMenu()) {
+        <!-- Backdrop -->
+        <div class="fixed inset-0 z-20" (click)="showColumnsMenu.set(false)"></div>
+
+        <!-- Menu -->
+        <div class="absolute right-0 top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-40 py-1 border border-qb-border">
+          @for (col of columns; track col.id) {
+            <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
+              <input
+                type="checkbox"
+                [checked]="isColVisible(col.id)"
+                (change)="toggleCol(col.id)"
+                class="accent-purple-500 w-3.5 h-3.5"
+              />
+              {{ col.label }}
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- Main -->
+  <main class="p-4">
+    @if (loading()) {
+      <p class="text-sm text-qb-muted text-center py-16">Loading issues…</p>
+    } @else if (error()) {
+      <p class="text-sm text-red-400 text-center py-16">{{ error() }}</p>
+    } @else if (filteredIssues().length === 0) {
+      <p class="text-sm text-qb-muted text-center py-16">No issues found.</p>
+    } @else {
+      <div class="overflow-x-auto rounded-xl qb-surface">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr>
+
+              @if (isColVisible('type')) {
+                <th class="text-xs text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border w-8"></th>
+              }
+
+              @if (isColVisible('work')) {
+                <th
+                  (click)="toggleSort('key')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Work <span class="opacity-50">{{ sortIcon('key') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('sprint')) {
+                <th
+                  (click)="toggleSort('sprint')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Sprint <span class="opacity-50">{{ sortIcon('sprint') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('assignee')) {
+                <th
+                  (click)="toggleSort('assignee')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Assignee <span class="opacity-50">{{ sortIcon('assignee') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('reporter')) {
+                <th
+                  (click)="toggleSort('reporter')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Reporter <span class="opacity-50">{{ sortIcon('reporter') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('priority')) {
+                <th
+                  (click)="toggleSort('priority')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Priority <span class="opacity-50">{{ sortIcon('priority') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('status')) {
+                <th
+                  (click)="toggleSort('status')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Status <span class="opacity-50">{{ sortIcon('status') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('resolution')) {
+                <th
+                  (click)="toggleSort('resolution')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Resolution <span class="opacity-50">{{ sortIcon('resolution') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('pts')) {
+                <th
+                  (click)="toggleSort('pts')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-center whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Pts <span class="opacity-50">{{ sortIcon('pts') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('created')) {
+                <th
+                  (click)="toggleSort('created')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Created <span class="opacity-50">{{ sortIcon('created') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('updated')) {
+                <th
+                  (click)="toggleSort('updated')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Updated <span class="opacity-50">{{ sortIcon('updated') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('space')) {
+                <th
+                  (click)="toggleSort('space')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Space <span class="opacity-50">{{ sortIcon('space') }}</span>
+                </th>
+              }
+
+            </tr>
+          </thead>
+          <tbody>
+            @for (issue of filteredIssues(); track issue.id) {
+              <tr class="border-b border-qb-border/50 hover:bg-white/5 transition-colors">
+
+                @if (isColVisible('type')) {
+                  <td class="px-3 py-2">
+                    <img [src]="issue.fields.issuetype.iconUrl" [alt]="issue.fields.issuetype.name" class="w-4 h-4" />
+                  </td>
+                }
+
+                @if (isColVisible('work')) {
+                  <td class="px-3 py-2 max-w-xs">
+                    <span class="font-mono text-xs text-qb-cyan mr-2">{{ issue.key }}</span>
+                    <span class="truncate">{{ issue.fields.summary }}</span>
+                  </td>
+                }
+
+                @if (isColVisible('sprint')) {
+                  <td class="px-3 py-2 text-qb-muted whitespace-nowrap">
+                    {{ issue.fields.customfield_10020?.name ?? '—' }}
+                  </td>
+                }
+
+                @if (isColVisible('assignee')) {
+                  <td class="px-3 py-2 whitespace-nowrap">
+                    @if (issue.fields.assignee) {
+                      <span class="flex items-center gap-1.5">
+                        <img [src]="issue.fields.assignee.avatarUrls['24x24']" alt="" class="w-5 h-5 rounded-full" />
+                        {{ issue.fields.assignee.displayName }}
+                      </span>
+                    } @else {
+                      <span class="text-qb-muted">—</span>
+                    }
+                  </td>
+                }
+
+                @if (isColVisible('reporter')) {
+                  <td class="px-3 py-2 whitespace-nowrap">
+                    @if (issue.fields.reporter) {
+                      <span class="flex items-center gap-1.5">
+                        <img [src]="issue.fields.reporter.avatarUrls['24x24']" alt="" class="w-5 h-5 rounded-full" />
+                        {{ issue.fields.reporter.displayName }}
+                      </span>
+                    } @else {
+                      <span class="text-qb-muted">—</span>
+                    }
+                  </td>
+                }
+
+                @if (isColVisible('priority')) {
+                  <td class="px-3 py-2 whitespace-nowrap">
+                    @if (issue.fields.priority) {
+                      <span class="flex items-center gap-1.5">
+                        <img [src]="issue.fields.priority.iconUrl" [alt]="issue.fields.priority.name" class="w-4 h-4" />
+                        {{ issue.fields.priority.name }}
+                      </span>
+                    } @else {
+                      <span class="text-qb-muted">—</span>
+                    }
+                  </td>
+                }
+
+                @if (isColVisible('status')) {
+                  <td class="px-3 py-2 whitespace-nowrap">
+                    <span
+                      class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                      [class]="statusClass(issue.fields.status.statusCategory.colorName)"
+                    >
+                      {{ issue.fields.status.name }}
+                    </span>
+                  </td>
+                }
+
+                @if (isColVisible('resolution')) {
+                  <td class="px-3 py-2 whitespace-nowrap">
+                    @if (issue.fields.resolution) {
+                      {{ issue.fields.resolution.name }}
+                    } @else {
+                      <span class="text-qb-muted">Unresolved</span>
+                    }
+                  </td>
+                }
+
+                @if (isColVisible('pts')) {
+                  <td class="px-3 py-2 text-center">
+                    @if (issue.fields.customfield_10016 !== null) {
+                      <span class="text-qb-cyan font-mono text-xs">{{ issue.fields.customfield_10016 }}</span>
+                    } @else {
+                      <span class="text-qb-muted">—</span>
+                    }
+                  </td>
+                }
+
+                @if (isColVisible('created')) {
+                  <td class="px-3 py-2 text-qb-muted whitespace-nowrap">
+                    {{ issue.fields.created | date:'MMM d, y' }}
+                  </td>
+                }
+
+                @if (isColVisible('updated')) {
+                  <td class="px-3 py-2 text-qb-muted whitespace-nowrap">
+                    {{ issue.fields.updated | date:'MMM d, y' }}
+                  </td>
+                }
+
+                @if (isColVisible('space')) {
+                  <td class="px-3 py-2 text-qb-muted whitespace-nowrap">
+                    {{ issue.fields.project.name }}
+                  </td>
+                }
+
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </main>
+
+</div>

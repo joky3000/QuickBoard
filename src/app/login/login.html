@@ -1,0 +1,73 @@
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-sm">
+    <div class="glow-purple rounded-2xl p-8 qb-surface">
+
+      <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          QuickBoard
+        </h1>
+        <p class="text-xs mt-2 tracking-widest uppercase text-qb-muted">Connect your Jira workspace</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-5">
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium tracking-widest uppercase text-qb-muted" for="email">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            class="input-cyber rounded-lg px-3 py-2.5 text-sm w-full"
+          />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <span class="text-xs text-red-400">Valid email required.</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium tracking-widest uppercase text-qb-muted" for="apiToken">
+            API Token
+          </label>
+          <input
+            id="apiToken"
+            type="password"
+            formControlName="apiToken"
+            placeholder="Your Jira API token"
+            class="input-cyber rounded-lg px-3 py-2.5 text-sm w-full"
+          />
+          @if (form.get('apiToken')?.invalid && form.get('apiToken')?.touched) {
+            <span class="text-xs text-red-400">API token required.</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium tracking-widest uppercase text-qb-muted" for="baseUrl">
+            Base URL
+          </label>
+          <input
+            id="baseUrl"
+            type="url"
+            formControlName="baseUrl"
+            placeholder="https://yoursite.atlassian.net"
+            class="input-cyber rounded-lg px-3 py-2.5 text-sm w-full"
+          />
+          @if (form.get('baseUrl')?.invalid && form.get('baseUrl')?.touched) {
+            <span class="text-xs text-red-400">Base URL required.</span>
+          }
+        </div>
+
+        @if (error()) {
+          <p class="text-xs text-red-400 text-center">{{ error() }}</p>
+        }
+
+        <app-cyber-button type="submit" [disabled]="loading()">
+          {{ loading() ? 'Connecting...' : 'Connect' }}
+        </app-cyber-button>
+
+      </form>
+    </div>
+  </div>
+</div>

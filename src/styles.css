@@ -1,3 +1,98 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@theme {
+  --color-qb-bg: #080b18;
+  --color-qb-surface: #0f1424;
+  --color-qb-border: #1e2a4a;
+  --color-qb-accent: #7c3aed;
+  --color-qb-accent-glow: #a855f7;
+  --color-qb-cyan: #22d3ee;
+  --color-qb-text: #e2e8f0;
+  --color-qb-muted: #64748b;
+}
+
+@layer base {
+  button,
+  a,
+  [role='button'] {
+    cursor: pointer;
+  }
+
+  body {
+    background-color: #080b18;
+    background-image:
+      radial-gradient(ellipse 60% 55% at 0% 50%, rgba(109, 40, 217, 0.28) 0%, transparent 100%),
+      radial-gradient(ellipse 50% 45% at 100% 10%, rgba(34, 211, 238, 0.22) 0%, transparent 100%),
+      radial-gradient(ellipse 45% 40% at 80% 100%, rgba(124, 58, 237, 0.2) 0%, transparent 100%),
+      radial-gradient(ellipse 35% 30% at 20% 0%, rgba(34, 211, 238, 0.14) 0%, transparent 100%),
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23080b18'/><line x1='0' y1='35' x2='120' y2='35' stroke='%2322d3ee' stroke-width='1.5' opacity='0.4'/><line x1='120' y1='0' x2='120' y2='75' stroke='%2322d3ee' stroke-width='1.5' opacity='0.4'/><line x1='120' y1='75' x2='200' y2='75' stroke='%2322d3ee' stroke-width='1' opacity='0.3'/><line x1='160' y1='75' x2='160' y2='200' stroke='%2322d3ee' stroke-width='1' opacity='0.25'/><line x1='0' y1='155' x2='60' y2='155' stroke='%2322d3ee' stroke-width='1' opacity='0.3'/><line x1='60' y1='155' x2='60' y2='200' stroke='%2322d3ee' stroke-width='1' opacity='0.3'/><line x1='40' y1='0' x2='40' y2='100' stroke='%237c3aed' stroke-width='1.5' opacity='0.38'/><line x1='0' y1='100' x2='200' y2='100' stroke='%237c3aed' stroke-width='1.5' opacity='0.35'/><line x1='80' y1='100' x2='80' y2='200' stroke='%237c3aed' stroke-width='1' opacity='0.28'/><line x1='80' y1='170' x2='200' y2='170' stroke='%237c3aed' stroke-width='1' opacity='0.22'/><circle cx='120' cy='35' r='3' fill='none' stroke='%2322d3ee' stroke-width='1.5' opacity='0.7'/><circle cx='120' cy='35' r='1.5' fill='%2322d3ee' opacity='0.9'/><circle cx='120' cy='75' r='3' fill='none' stroke='%2322d3ee' stroke-width='1.5' opacity='0.6'/><circle cx='120' cy='75' r='1.5' fill='%2322d3ee' opacity='0.8'/><circle cx='160' cy='75' r='2.5' fill='none' stroke='%2322d3ee' stroke-width='1' opacity='0.55'/><circle cx='160' cy='75' r='1' fill='%2322d3ee' opacity='0.75'/><circle cx='60' cy='155' r='2.5' fill='none' stroke='%2322d3ee' stroke-width='1' opacity='0.55'/><circle cx='60' cy='155' r='1' fill='%2322d3ee' opacity='0.75'/><circle cx='40' cy='100' r='3.5' fill='none' stroke='%237c3aed' stroke-width='1.5' opacity='0.7'/><circle cx='40' cy='100' r='1.5' fill='%237c3aed' opacity='0.9'/><circle cx='80' cy='100' r='3' fill='none' stroke='%237c3aed' stroke-width='1.5' opacity='0.6'/><circle cx='80' cy='100' r='1.5' fill='%237c3aed' opacity='0.8'/><circle cx='80' cy='170' r='2.5' fill='none' stroke='%237c3aed' stroke-width='1' opacity='0.5'/><circle cx='80' cy='170' r='1' fill='%237c3aed' opacity='0.7'/></svg>");
+    background-size: cover, cover, cover, cover, 200px 200px;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+    background-attachment: fixed, fixed, fixed, fixed, fixed;
+    color: #e2e8f0;
+  }
+}
+
+@layer components {
+  .input-cyber {
+    background-color: rgba(8, 11, 24, 0.9);
+    border: 1px solid #1e2a4a;
+    color: #e2e8f0;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .input-cyber::placeholder {
+    color: #64748b;
+  }
+
+  .input-cyber:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 1px #7c3aed, 0 0 14px rgba(124, 58, 237, 0.35);
+  }
+}
+
+@layer utilities {
+  .qb-surface {
+    background-color: rgba(15, 20, 36, 0.97);
+    border: 1px solid var(--color-qb-border);
+  }
+
+  .qb-header {
+    background-color: rgba(15, 20, 36, 0.97);
+    border-bottom: 1px solid var(--color-qb-border);
+  }
+
+  .qb-badge {
+    background: linear-gradient(135deg, var(--color-qb-accent), #6d28d9);
+    box-shadow: 0 0 14px rgba(124, 58, 237, 0.45);
+  }
+
+  .qb-tip {
+    background: rgba(34, 211, 238, 0.06);
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    color: var(--color-qb-muted);
+  }
+
+  .glow-purple {
+    border: 1px solid #7c3aed;
+    box-shadow: 0 0 28px rgba(124, 58, 237, 0.4), inset 0 0 28px rgba(124, 58, 237, 0.05);
+  }
+
+  .btn-cyber {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.45);
+    transition: filter 150ms ease, box-shadow 150ms ease;
+  }
+
+  .btn-cyber:hover:not(:disabled) {
+    filter: brightness(1.15);
+    box-shadow: 0 0 28px rgba(124, 58, 237, 0.65);
+  }
+
+  .btn-cyber:disabled {
+    opacity: 0.5;
+  }
+}
