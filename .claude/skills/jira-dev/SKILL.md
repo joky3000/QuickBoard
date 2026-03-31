@@ -1,33 +1,16 @@
 ---
 name: jira-dev
-description: Full dev workflow for a Jira task — fetches task details, creates a branch, researches the codebase, implements the solution, runs /simplify, and creates a PR. Use after picking a task with /jira.
+description: Full dev workflow for a Jira task — fetches task details, creates a branch, researches the codebase, implements the solution, runs /simplify, and creates a PR. Uses the Atlassian MCP server.
 user-invocable: true
 disable-model-invocation: false
 argument-hint: "<issue-key> (e.g., SCRUM-123)"
 model: claude-opus-4-6
-allowed-tools: Bash(curl *), Bash(git *), Bash(gh *), Read, Grep, Glob, Agent, Edit, Write
+allowed-tools: mcp__atlassian__*, Bash(git *), Bash(gh *), Read, Grep, Glob, Agent, Edit, Write
 ---
 
 # Jira Development Workflow
 
-You are executing a full development workflow for Jira issue **$ARGUMENTS**.
-
-## Authentication
-
-All Jira API calls use Basic Auth:
-```bash
-AUTH=$(echo -n "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64)
-```
-
-**Before doing anything**, verify credentials are set:
-```bash
-if [ -z "$JIRA_EMAIL" ] || [ -z "$JIRA_API_TOKEN" ]; then
-  echo "ERROR: JIRA_EMAIL and JIRA_API_TOKEN environment variables must be set."
-  exit 1
-fi
-```
-
-Base URL: `https://hpskate26.atlassian.net`
+You are executing a full development workflow for Jira issue **$ARGUMENTS**, using the **Atlassian MCP server** for all Jira interactions.
 
 ---
 
@@ -35,13 +18,7 @@ Base URL: `https://hpskate26.atlassian.net`
 
 ### Step 1: Fetch Task Details
 
-```bash
-AUTH=$(echo -n "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64)
-curl -s -X GET \
-  "https://hpskate26.atlassian.net/rest/api/3/issue/$ARGUMENTS?fields=summary,description,status,priority,assignee,customfield_10016,comment,subtasks" \
-  -H "Authorization: Basic $AUTH" \
-  -H "Content-Type: application/json"
-```
+Use the MCP `jira_get_issue` tool with key `$ARGUMENTS`. Request fields: `summary, description, status, priority, assignee, customfield_10016, comment, subtasks`.
 
 Parse and display:
 - **Title** and **Key**
@@ -64,11 +41,8 @@ Slugify the title:
 
 Create and checkout the branch:
 ```bash
-# Ensure we're on main and up to date
 git checkout main
 git pull origin main
-
-# Create the new branch
 BRANCH_NAME="<number>-<slugified-title>"
 git checkout -b "$BRANCH_NAME"
 ```
@@ -77,26 +51,9 @@ Example: `SCRUM-548` + "Fix layout in marketing" → `548-fix-layout-in-marketin
 
 ### Step 3: Update Jira Status
 
-Assign to self and transition to "En cours" (if not already):
-
-```bash
-AUTH=$(echo -n "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64)
-
-# Get current user
-MYSELF=$(curl -s "https://hpskate26.atlassian.net/rest/api/3/myself" -H "Authorization: Basic $AUTH")
-ACCOUNT_ID=$(echo $MYSELF | python -c "import sys,json; print(json.load(sys.stdin)['accountId'])" 2>/dev/null || echo $MYSELF | grep -o '"accountId":"[^"]*"' | head -1 | cut -d'"' -f4)
-
-# Assign
-curl -s -X PUT \
-  "https://hpskate26.atlassian.net/rest/api/3/issue/$ARGUMENTS/assignee" \
-  -H "Authorization: Basic $AUTH" \
-  -H "Content-Type: application/json" \
-  -d "{\"accountId\": \"$ACCOUNT_ID\"}"
-
-# Get transitions and move to "En cours"
-TRANSITIONS=$(curl -s "https://hpskate26.atlassian.net/rest/api/3/issue/$ARGUMENTS/transitions" -H "Authorization: Basic $AUTH")
-# Find the transition ID for "En cours" and execute it
-```
+1. Use MCP `jira_get_myself` to get the current user's accountId
+2. Use MCP `jira_assign_issue` to assign the issue to self
+3. Use MCP `jira_transition_issue` to move to "En cours" (if not already)
 
 ### Step 4: Research the Codebase
 
@@ -108,11 +65,6 @@ Based on the task description, **use Explore agents** to understand the relevant
 - Look at recent git history for related changes
 
 **Launch up to 3 Explore agents in parallel** if the task touches multiple areas.
-
-Refer to the project architecture:
-- **Backend**: `app/Domains/{Domain}/{Actions,Http/Controllers,Http/Requests,Models}/`
-- **Frontend**: `resources/js/features/{featureName}/{api,hooks,components,lib,types}/`
-- **Routes**: `routes/web.php`
 
 ### Step 5: Ask Clarifying Questions — MANDATORY
 
@@ -128,12 +80,9 @@ Refer to the project architecture:
 ### Step 6: Implement the Solution
 
 After user confirmation:
-- Follow the project's DDD architecture (backend) and feature-based architecture (frontend)
-- Keep controllers thin — business logic goes in Actions
-- Use TanStack Query for data fetching, Zustand for complex client state
-- Follow existing naming conventions (PascalCase for PHP, camelCase for features)
-- Use `useTranslation()` for any user-facing strings
-- Add translations to both `en.json` and `fr.json`
+- Follow the project's existing architecture and patterns
+- Keep it simple — only change what the task requires
+- Follow existing naming conventions
 
 ### Step 7: Run /simplify
 
@@ -143,8 +92,6 @@ After implementation is complete, invoke the `/simplify` skill to:
 - Fix any issues found
 
 ### Step 8: Create Pull Request
-
-Create a PR using GitHub CLI:
 
 ```bash
 gh pr create \
@@ -170,13 +117,7 @@ EOF
 
 ### Step 9: Update Jira to "En attente"
 
-Transition the issue to "En attente" (awaiting review):
-
-```bash
-AUTH=$(echo -n "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64)
-TRANSITIONS=$(curl -s "https://hpskate26.atlassian.net/rest/api/3/issue/$ARGUMENTS/transitions" -H "Authorization: Basic $AUTH")
-# Find transition ID for "En attente" and execute it
-```
+Use MCP `jira_transition_issue` to move to "En attente" (awaiting review).
 
 ### Step 10: Final Summary
 
@@ -194,5 +135,4 @@ Present to the user:
 - **Always ask before implementing** — Step 5 is mandatory
 - **Follow existing patterns** — Don't introduce new patterns or libraries
 - **Keep it simple** — Only change what the task requires
-- **Translations** — Any new user-facing text needs both `en.json` and `fr.json` entries
-- **No mocks in tests** — Use real database connections for integration tests
+- All Jira interactions use the Atlassian MCP server — no curl needed

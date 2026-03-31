@@ -23,11 +23,15 @@ createServer((req, res) => {
     return;
   }
 
-  const headers = { ...req.headers };
-  delete headers['host'];
-  delete headers['x-jira-base-url'];
-  delete headers['content-length'];
+  const headers = {};
+  headers['authorization'] = req.headers['authorization'];
+  headers['accept'] = req.headers['accept'] || 'application/json';
+  headers['content-type'] = req.headers['content-type'] || 'application/json';
+  headers['x-atlassian-token'] = 'no-check';
   headers['host'] = hostname;
+  if (req.headers['content-length']) {
+    headers['content-length'] = req.headers['content-length'];
+  }
 
   const proxyReq = httpsRequest(
     { hostname, path: basePath + req.url, method: req.method, headers },

@@ -6,14 +6,18 @@ import { AuthService } from './auth.service';
 export class JiraService {
   private auth = inject(AuthService);
 
-  private async fetch<T>(path: string): Promise<T> {
+  private async fetch<T>(path: string, options?: RequestInit): Promise<T> {
     const creds = this.auth.getCredentials();
     if (!creds) throw new Error('Not authenticated');
     const res = await fetch(`/api/jira${path}`, {
+      ...options,
       headers: {
         Authorization: this.auth.getAuthHeader(),
         Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Atlassian-Token': 'no-check',
         'X-Jira-Base-URL': creds.baseUrl,
+        ...options?.headers,
       },
     });
     if (!res.ok) throw new Error(`Jira API error ${res.status}: ${res.statusText}`);
@@ -25,6 +29,7 @@ export class JiraService {
       headers: {
         Authorization: `Basic ${btoa(`${email}:${apiToken}`)}`,
         Accept: 'application/json',
+        'X-Atlassian-Token': 'no-check',
         'X-Jira-Base-URL': baseUrl,
       },
     });
@@ -43,12 +48,24 @@ export class JiraService {
     return this.fetch<JiraSprintsResponse>(`/rest/agile/1.0/board/${boardId}/sprint?state=active`);
   }
 
-  getIssuesForSprint(sprintId: number): Promise<JiraIssuesResponse> {
+  getMyRecentIssues(): Promise<JiraIssuesResponse> {
     const fields = [
       'summary', 'issuetype', 'assignee', 'reporter', 'priority',
       'status', 'resolution', 'created', 'updated', 'project',
-      'customfield_10016', 'customfield_10020',
+      'customfield_10016', 'customfield_10020', 'subtasks', 'timetracking',
     ].join(',');
-    return this.fetch<JiraIssuesResponse>(`/rest/agile/1.0/sprint/${sprintId}/issue?fields=${fields}&maxResults=200`);
+    const jql = encodeURIComponent(
+      'assignee = currentUser() AND updated >= -26w ORDER BY updated DESC',
+    );
+    return this.fetch<JiraIssuesResponse>(
+      `/rest/api/3/search/jql?jql=${jql}&fields=${fields}&maxResults=200`,
+    );
+  }
+
+  logWork(issueKey: string, timeSpent: string): Promise<void> {
+    return this.fetch(`/rest/api/3/issue/${issueKey}/worklog`, {
+      method: 'POST',
+      body: JSON.stringify({ timeSpent }),
+    });
   }
 }

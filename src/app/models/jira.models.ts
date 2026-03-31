@@ -52,6 +52,26 @@ export interface JiraIssue {
     project: { key: string; name: string };
     customfield_10016: number | null;
     customfield_10020?: { id: number; name: string } | null;
+    subtasks?: JiraSubtask[];
+    timetracking?: {
+      originalEstimate?: string;
+      remainingEstimate?: string;
+      timeSpent?: string;
+      originalEstimateSeconds?: number;
+      remainingEstimateSeconds?: number;
+      timeSpentSeconds?: number;
+    };
+  };
+}
+
+export interface JiraSubtask {
+  id: string;
+  key: string;
+  fields: {
+    summary: string;
+    issuetype: { name: string; iconUrl: string };
+    status: { name: string; statusCategory: { colorName: string } };
+    priority: { name: string; iconUrl: string } | null;
   };
 }
 

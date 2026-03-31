@@ -1,14 +1,16 @@
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Component, computed, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { APP_PATHS } from '../app.routes.paths';
-import { JiraBoard, JiraIssue, JiraSprint } from '../models/jira.models';
+import { JiraIssue, JiraSprint } from '../models/jira.models';
 import { AuthService } from '../services/auth.service';
 import { JiraService } from '../services/jira.service';
 
-export type ColId =
+type ColId =
   | 'type'
-  | 'work'
+  | 'key'
+  | 'summary'
   | 'sprint'
   | 'assignee'
   | 'reporter'
@@ -16,33 +18,36 @@ export type ColId =
   | 'status'
   | 'resolution'
   | 'pts'
+  | 'time'
   | 'created'
   | 'updated'
   | 'space';
 
-export const ALL_COLUMNS: { id: ColId; label: string; sortKey?: string }[] = [
+const ALL_COLUMNS: { id: ColId; label: string; sortKey?: string }[] = [
   { id: 'type', label: 'Type' },
-  { id: 'work', label: 'Work', sortKey: 'key' },
+  { id: 'key', label: 'Key', sortKey: 'key' },
+  { id: 'summary', label: 'Summary', sortKey: 'summary' },
   { id: 'sprint', label: 'Sprint', sortKey: 'sprint' },
   { id: 'assignee', label: 'Assignee', sortKey: 'assignee' },
   { id: 'reporter', label: 'Reporter', sortKey: 'reporter' },
   { id: 'priority', label: 'Priority', sortKey: 'priority' },
   { id: 'status', label: 'Status', sortKey: 'status' },
   { id: 'resolution', label: 'Resolution', sortKey: 'resolution' },
-  { id: 'pts', label: 'Pts', sortKey: 'pts' },
+  { id: 'pts', label: 'User Point', sortKey: 'pts' },
+  { id: 'time', label: 'Time', sortKey: 'time' },
   { id: 'created', label: 'Created', sortKey: 'created' },
   { id: 'updated', label: 'Updated', sortKey: 'updated' },
   { id: 'space', label: 'Space', sortKey: 'space' },
 ];
 
 const DEFAULT_VISIBLE = new Set<ColId>([
-  'type', 'work', 'sprint', 'assignee', 'priority', 'status', 'pts', 'created', 'space',
+  'type', 'key', 'summary', 'sprint', 'priority', 'status', 'pts', 'time', 'created', 'space',
 ]);
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, FormsModule],
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent implements OnInit {
@@ -64,19 +69,21 @@ export class DashboardComponent implements OnInit {
   filterStatuses = signal(new Set<string>());
   filterIssueTypes = signal(new Set<string>());
 
-  // Filter menu open states
-  showSprintMenu = signal(false);
-  showTypeMenu = signal(false);
-  showPriorityMenu = signal(false);
-  showStatusMenu = signal(false);
+  // Which dropdown menu is currently open (null = all closed)
+  openMenu = signal<'sprint' | 'type' | 'priority' | 'status' | 'columns' | null>(null);
+
+  // View mode
+  viewMode = signal<'list' | 'kanban'>('list');
 
   // Sort
-  sortCol = signal('');
+  sortCol = signal<string | null>(null);
   sortDir = signal<'asc' | 'desc'>('asc');
+
+  // Expanded subtasks
+  expandedIssues = signal(new Set<string>());
 
   // Column visibility
   visibleColumns = signal<Set<ColId>>(new Set(DEFAULT_VISIBLE));
-  showColumnsMenu = signal(false);
 
   // Dropdown options
   uniquePriorities = computed(() =>
@@ -116,6 +123,7 @@ export class DashboardComponent implements OnInit {
         let vb: string | number = '';
         switch (col) {
           case 'key':        va = a.key;                                   vb = b.key;                                   break;
+          case 'summary':    va = a.fields.summary;                        vb = b.fields.summary;                        break;
           case 'sprint':     va = a.fields.customfield_10020?.name ?? '';  vb = b.fields.customfield_10020?.name ?? '';  break;
           case 'assignee':   va = a.fields.assignee?.displayName ?? '';    vb = b.fields.assignee?.displayName ?? '';    break;
           case 'reporter':   va = a.fields.reporter?.displayName ?? '';    vb = b.fields.reporter?.displayName ?? '';    break;
@@ -124,6 +132,7 @@ export class DashboardComponent implements OnInit {
           case 'resolution': va = a.fields.resolution?.name ?? '';         vb = b.fields.resolution?.name ?? '';         break;
           case 'pts':        va = a.fields.customfield_10016 ?? -1;        vb = b.fields.customfield_10016 ?? -1;        break;
           case 'created':    va = a.fields.created;                        vb = b.fields.created;                        break;
+          case 'time':       va = a.fields.timetracking?.timeSpentSeconds ?? -1; vb = b.fields.timetracking?.timeSpentSeconds ?? -1; break;
           case 'updated':    va = a.fields.updated;                        vb = b.fields.updated;                        break;
           case 'space':      va = a.fields.project.name;                   vb = b.fields.project.name;                   break;
         }
@@ -135,6 +144,35 @@ export class DashboardComponent implements OnInit {
     }
 
     return list;
+  });
+
+  kanbanColumns = computed(() => {
+    const issues = this.filteredIssues();
+    const grouped = new Map<string, { colorName: string; issues: JiraIssue[] }>();
+    for (const issue of issues) {
+      const status = issue.fields.status.name;
+      const colorName = issue.fields.status.statusCategory.colorName;
+      let col = grouped.get(status);
+      if (!col) {
+        col = { colorName, issues: [] };
+        grouped.set(status, col);
+      }
+      col.issues.push(issue);
+    }
+    return [...grouped.entries()].map(([name, { colorName, issues: items }]) => ({
+      name,
+      colorName,
+      issues: items,
+    }));
+  });
+
+  hasSubtasks = computed(() => this.filteredIssues().some((i) => (i.fields.subtasks?.length ?? 0) > 0));
+
+  allExpanded = computed(() => {
+    const expanded = this.expandedIssues();
+    return this.filteredIssues()
+      .filter((i) => (i.fields.subtasks?.length ?? 0) > 0)
+      .every((i) => expanded.has(i.id));
   });
 
   hasActiveFilters = computed(
@@ -152,35 +190,18 @@ export class DashboardComponent implements OnInit {
 
   private async loadData(): Promise<void> {
     try {
-      const boardsRes = await this.jira.getBoards();
-      const boards: JiraBoard[] = boardsRes.values;
+      const res = await this.jira.getMyRecentIssues();
+      this.issues.set(res.issues);
 
-      const sprintsPerBoard = await Promise.all(
-        boards.map((b) =>
-          this.jira.getActiveSprintsForBoard(b.id).catch(() => ({ values: [], isLast: true })),
-        ),
-      );
-
-      const allSprints = sprintsPerBoard.flatMap((r) => r.values);
-      this.sprints.set(allSprints);
-
-      const issuesPerSprint = await Promise.all(
-        allSprints.map((s) =>
-          this.jira.getIssuesForSprint(s.id).catch(() => ({ issues: [], total: 0 })),
-        ),
-      );
-
-      const seen = new Set<string>();
-      const allIssues: JiraIssue[] = [];
-      for (const res of issuesPerSprint) {
-        for (const issue of res.issues) {
-          if (!seen.has(issue.id)) {
-            seen.add(issue.id);
-            allIssues.push(issue);
-          }
+      // Derive sprints from fetched issues
+      const sprintMap = new Map<number, JiraSprint>();
+      for (const issue of res.issues) {
+        const sprint = issue.fields.customfield_10020;
+        if (sprint && !sprintMap.has(sprint.id)) {
+          sprintMap.set(sprint.id, { id: sprint.id, name: sprint.name, state: 'active' });
         }
       }
-      this.issues.set(allIssues);
+      this.sprints.set([...sprintMap.values()]);
     } catch (e) {
       this.error.set(e instanceof Error ? e.message : 'Failed to load Jira data.');
     } finally {
@@ -212,6 +233,64 @@ export class DashboardComponent implements OnInit {
     const next = new Set(sig());
     next.has(value) ? next.delete(value) : next.add(value);
     sig.set(next);
+  }
+
+  toggleMenu(menu: 'sprint' | 'type' | 'priority' | 'status' | 'columns'): void {
+    this.openMenu.update((v) => (v === menu ? null : menu));
+  }
+
+  closeMenu(): void {
+    this.openMenu.set(null);
+  }
+
+  // Time log modal
+  logIssue = signal<JiraIssue | null>(null);
+  logTimeValue = signal('');
+  logSaving = signal(false);
+
+  toggleExpand(issueId: string): void {
+    const next = new Set(this.expandedIssues());
+    next.has(issueId) ? next.delete(issueId) : next.add(issueId);
+    this.expandedIssues.set(next);
+  }
+
+  toggleExpandAll(): void {
+    if (this.allExpanded()) {
+      this.expandedIssues.set(new Set());
+    } else {
+      const all = new Set(
+        this.filteredIssues()
+          .filter((i) => (i.fields.subtasks?.length ?? 0) > 0)
+          .map((i) => i.id),
+      );
+      this.expandedIssues.set(all);
+    }
+  }
+
+  openLogTime(issue: JiraIssue): void {
+    this.logIssue.set(issue);
+    this.logTimeValue.set('');
+  }
+
+  closeLogTime(): void {
+    this.logIssue.set(null);
+    this.logTimeValue.set('');
+  }
+
+  async submitLogTime(): Promise<void> {
+    const issue = this.logIssue();
+    const time = this.logTimeValue().trim();
+    if (!issue || !time) return;
+    this.logSaving.set(true);
+    try {
+      await this.jira.logWork(issue.key, time);
+      this.closeLogTime();
+      void this.loadData();
+    } catch (e) {
+      this.error.set(e instanceof Error ? e.message : 'Failed to log time.');
+    } finally {
+      this.logSaving.set(false);
+    }
   }
 
   toggleSort(key: string): void {

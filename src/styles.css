@@ -52,6 +52,35 @@
     border-color: #7c3aed;
     box-shadow: 0 0 0 1px #7c3aed, 0 0 14px rgba(124, 58, 237, 0.35);
   }
+
+  .qb-checkbox {
+    appearance: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 3px;
+    border: 1px solid #1e2a4a;
+    background-color: #0a0e1f;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .qb-checkbox:checked {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+  }
+
+  .qb-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
 }
 
 @layer utilities {

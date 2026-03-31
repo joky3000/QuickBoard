@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "atlassian": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/atlassian-mcp-server"],
+      "env": {
+        "ATLASSIAN_SITE_URL": "https://hpskate26.atlassian.net",
+        "ATLASSIAN_USER_EMAIL": "${JIRA_EMAIL}",
+        "ATLASSIAN_API_TOKEN": "${JIRA_API_TOKEN}"
+      }
+    }
+  }
+}

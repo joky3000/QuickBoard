@@ -28,7 +28,7 @@
     <!-- Filter: Sprint -->
     <div class="relative">
       <button
-        (click)="showSprintMenu.update(v => !v)"
+        (click)="toggleMenu('sprint')"
         class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
         [class.border-purple-500]="filterSprints().size > 0"
       >
@@ -37,12 +37,12 @@
           <path d="m6 9 6 6 6-6"/>
         </svg>
       </button>
-      @if (showSprintMenu()) {
-        <div class="fixed inset-0 z-20" (click)="showSprintMenu.set(false)"></div>
+      @if (openMenu() === 'sprint') {
+        <div class="fixed inset-0 z-20" (click)="closeMenu()"></div>
         <div class="absolute top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-44 py-1 border border-qb-border max-h-64 overflow-y-auto">
           @for (s of sprints(); track s.id) {
             <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
-              <input type="checkbox" [checked]="filterSprints().has(s.name)" (change)="toggleFilter(filterSprints, s.name)" class="accent-purple-500 w-3.5 h-3.5" />
+              <input type="checkbox" [checked]="filterSprints().has(s.name)" (change)="toggleFilter(filterSprints, s.name)" class="qb-checkbox" />
               {{ s.name }}
             </label>
           }
@@ -53,7 +53,7 @@
     <!-- Filter: Type -->
     <div class="relative">
       <button
-        (click)="showTypeMenu.update(v => !v)"
+        (click)="toggleMenu('type')"
         class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
         [class.border-purple-500]="filterIssueTypes().size > 0"
       >
@@ -62,12 +62,12 @@
           <path d="m6 9 6 6 6-6"/>
         </svg>
       </button>
-      @if (showTypeMenu()) {
-        <div class="fixed inset-0 z-20" (click)="showTypeMenu.set(false)"></div>
+      @if (openMenu() === 'type') {
+        <div class="fixed inset-0 z-20" (click)="closeMenu()"></div>
         <div class="absolute top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-44 py-1 border border-qb-border max-h-64 overflow-y-auto">
           @for (t of uniqueIssueTypes(); track t) {
             <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
-              <input type="checkbox" [checked]="filterIssueTypes().has(t)" (change)="toggleFilter(filterIssueTypes, t)" class="accent-purple-500 w-3.5 h-3.5" />
+              <input type="checkbox" [checked]="filterIssueTypes().has(t)" (change)="toggleFilter(filterIssueTypes, t)" class="qb-checkbox" />
               {{ t }}
             </label>
           }
@@ -78,7 +78,7 @@
     <!-- Filter: Priority -->
     <div class="relative">
       <button
-        (click)="showPriorityMenu.update(v => !v)"
+        (click)="toggleMenu('priority')"
         class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
         [class.border-purple-500]="filterPriorities().size > 0"
       >
@@ -87,12 +87,12 @@
           <path d="m6 9 6 6 6-6"/>
         </svg>
       </button>
-      @if (showPriorityMenu()) {
-        <div class="fixed inset-0 z-20" (click)="showPriorityMenu.set(false)"></div>
+      @if (openMenu() === 'priority') {
+        <div class="fixed inset-0 z-20" (click)="closeMenu()"></div>
         <div class="absolute top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-44 py-1 border border-qb-border max-h-64 overflow-y-auto">
           @for (p of uniquePriorities(); track p) {
             <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
-              <input type="checkbox" [checked]="filterPriorities().has(p)" (change)="toggleFilter(filterPriorities, p)" class="accent-purple-500 w-3.5 h-3.5" />
+              <input type="checkbox" [checked]="filterPriorities().has(p)" (change)="toggleFilter(filterPriorities, p)" class="qb-checkbox" />
               {{ p }}
             </label>
           }
@@ -103,7 +103,7 @@
     <!-- Filter: Status -->
     <div class="relative">
       <button
-        (click)="showStatusMenu.update(v => !v)"
+        (click)="toggleMenu('status')"
         class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
         [class.border-purple-500]="filterStatuses().size > 0"
       >
@@ -112,12 +112,12 @@
           <path d="m6 9 6 6 6-6"/>
         </svg>
       </button>
-      @if (showStatusMenu()) {
-        <div class="fixed inset-0 z-20" (click)="showStatusMenu.set(false)"></div>
+      @if (openMenu() === 'status') {
+        <div class="fixed inset-0 z-20" (click)="closeMenu()"></div>
         <div class="absolute top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-44 py-1 border border-qb-border max-h-64 overflow-y-auto">
           @for (s of uniqueStatuses(); track s) {
             <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
-              <input type="checkbox" [checked]="filterStatuses().has(s)" (change)="toggleFilter(filterStatuses, s)" class="accent-purple-500 w-3.5 h-3.5" />
+              <input type="checkbox" [checked]="filterStatuses().has(s)" (change)="toggleFilter(filterStatuses, s)" class="qb-checkbox" />
               {{ s }}
             </label>
           }
@@ -136,10 +136,46 @@
 
     <span class="text-xs text-qb-muted ml-auto">{{ filteredIssues().length }} issues</span>
 
+    <!-- Expand all / Collapse all -->
+    @if (hasSubtasks()) {
+      <button
+        (click)="toggleExpandAll()"
+        class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5 whitespace-nowrap"
+      >
+        <svg class="w-3.5 h-3.5 transition-transform" [class.rotate-90]="allExpanded()" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+        {{ allExpanded() ? 'Collapse all' : 'Expand all' }}
+      </button>
+    }
+
+    <!-- View toggle -->
+    <div class="flex items-center rounded border border-qb-border overflow-hidden">
+      <button
+        (click)="viewMode.set('list')"
+        class="px-2 py-1 text-xs transition-colors"
+        [class]="viewMode() === 'list' ? 'bg-purple-600/30 text-purple-300' : 'text-qb-muted hover:text-qb-text'"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
+        </svg>
+      </button>
+      <button
+        (click)="viewMode.set('kanban')"
+        class="px-2 py-1 text-xs transition-colors"
+        [class]="viewMode() === 'kanban' ? 'bg-purple-600/30 text-purple-300' : 'text-qb-muted hover:text-qb-text'"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/>
+        </svg>
+      </button>
+    </div>
+
     <!-- Columns dropdown -->
+    @if (viewMode() === 'list') {
     <div class="relative">
       <button
-        (click)="showColumnsMenu.update(v => !v)"
+        (click)="toggleMenu('columns')"
         class="input-cyber rounded px-3 py-1.5 text-sm flex items-center gap-1.5"
       >
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -148,11 +184,8 @@
         Columns
       </button>
 
-      @if (showColumnsMenu()) {
-        <!-- Backdrop -->
-        <div class="fixed inset-0 z-20" (click)="showColumnsMenu.set(false)"></div>
-
-        <!-- Menu -->
+      @if (openMenu() === 'columns') {
+        <div class="fixed inset-0 z-20" (click)="closeMenu()"></div>
         <div class="absolute right-0 top-full mt-1.5 z-30 rounded-xl qb-surface shadow-xl min-w-40 py-1 border border-qb-border">
           @for (col of columns; track col.id) {
             <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm select-none">
@@ -160,7 +193,7 @@
                 type="checkbox"
                 [checked]="isColVisible(col.id)"
                 (change)="toggleCol(col.id)"
-                class="accent-purple-500 w-3.5 h-3.5"
+                class="qb-checkbox"
               />
               {{ col.label }}
             </label>
@@ -168,6 +201,7 @@
         </div>
       }
     </div>
+    }
 
   </div>
 
@@ -179,29 +213,111 @@
       <p class="text-sm text-red-400 text-center py-16">{{ error() }}</p>
     } @else if (filteredIssues().length === 0) {
       <p class="text-sm text-qb-muted text-center py-16">No issues found.</p>
+    } @else if (viewMode() === 'kanban') {
+      <!-- Kanban board -->
+      <div class="flex gap-4 overflow-x-auto pb-4 items-start">
+        @for (col of kanbanColumns(); track col.name) {
+          <div class="flex-shrink-0 w-72 rounded-xl qb-surface overflow-hidden">
+            <div class="px-3 py-2 border-b border-qb-border flex items-center justify-between">
+              <span
+                class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                [class]="statusClass(col.colorName)"
+              >
+                {{ col.name }}
+              </span>
+              <span class="text-xs text-qb-muted">{{ col.issues.length }}</span>
+            </div>
+
+            <div class="p-2 flex flex-col gap-2 max-h-[calc(100vh-12rem)] overflow-y-auto">
+              @for (issue of col.issues; track issue.id) {
+                <div class="rounded-lg bg-qb-bg/60 border border-qb-border/50 p-2.5 hover:border-purple-500/40 transition-colors">
+                  <div class="flex items-center gap-1.5 mb-1">
+                    <img [src]="issue.fields.issuetype.iconUrl" [alt]="issue.fields.issuetype.name" class="w-3.5 h-3.5" />
+                    <span class="font-mono text-xs text-qb-cyan">{{ issue.key }}</span>
+                    @if (issue.fields.timetracking?.timeSpent) {
+                      <span class="ml-auto text-[10px] text-qb-muted">{{ issue.fields.timetracking!.timeSpent }}</span>
+                    }
+                  </div>
+                  <p class="text-sm leading-snug mb-2 line-clamp-2">{{ issue.fields.summary }}</p>
+                  <div class="flex items-center gap-2 text-xs text-qb-muted">
+                    @if (issue.fields.assignee) {
+                      <img [src]="issue.fields.assignee.avatarUrls['24x24']" alt="" class="w-4 h-4 rounded-full" />
+                    }
+                    @if (issue.fields.priority) {
+                      <img [src]="issue.fields.priority.iconUrl" [alt]="issue.fields.priority.name" class="w-3.5 h-3.5" />
+                    }
+                    @if (issue.fields.subtasks?.length) {
+                      <button (click)="toggleExpand(issue.id)" class="flex items-center gap-0.5 hover:text-qb-text transition-colors">
+                        <svg class="w-3 h-3 transition-transform" [class.rotate-90]="expandedIssues().has(issue.id)" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                          <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                        {{ issue.fields.subtasks!.length }}
+                      </button>
+                    }
+                    <!-- Log time button -->
+                    <button (click)="openLogTime(issue)" class="ml-auto hover:text-qb-text transition-colors" title="Log time">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                      </svg>
+                    </button>
+                  </div>
+                  @if (expandedIssues().has(issue.id) && issue.fields.subtasks?.length) {
+                    <div class="mt-2 pt-2 border-t border-qb-border/30 flex flex-col gap-1">
+                      @for (sub of issue.fields.subtasks; track sub.id) {
+                        <div class="flex items-center gap-1.5 text-xs">
+                          <img [src]="sub.fields.issuetype.iconUrl" [alt]="sub.fields.issuetype.name" class="w-3 h-3" />
+                          <span class="font-mono text-qb-cyan">{{ sub.key }}</span>
+                          <span class="truncate text-qb-text flex-1">{{ sub.fields.summary }}</span>
+                          <span
+                            class="inline-flex items-center rounded-full border px-1.5 py-0 text-[9px] font-medium flex-shrink-0"
+                            [class]="statusClass(sub.fields.status.statusCategory.colorName)"
+                          >
+                            {{ sub.fields.status.name }}
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
     } @else {
+      <!-- List view -->
       <div class="overflow-x-auto rounded-xl qb-surface">
         <table class="w-full text-sm border-collapse">
           <thead>
             <tr>
 
               @if (isColVisible('type')) {
-                <th class="text-xs text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border w-8"></th>
+                <th class="text-xs text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface w-8"></th>
               }
 
-              @if (isColVisible('work')) {
+              @if (isColVisible('key')) {
                 <th
                   (click)="toggleSort('key')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
-                  Work <span class="opacity-50">{{ sortIcon('key') }}</span>
+                  Key <span class="opacity-50">{{ sortIcon('key') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('summary')) {
+                <th
+                  (click)="toggleSort('summary')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Summary <span class="opacity-50">{{ sortIcon('summary') }}</span>
                 </th>
               }
 
               @if (isColVisible('sprint')) {
                 <th
                   (click)="toggleSort('sprint')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Sprint <span class="opacity-50">{{ sortIcon('sprint') }}</span>
                 </th>
@@ -210,7 +326,7 @@
               @if (isColVisible('assignee')) {
                 <th
                   (click)="toggleSort('assignee')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Assignee <span class="opacity-50">{{ sortIcon('assignee') }}</span>
                 </th>
@@ -219,7 +335,7 @@
               @if (isColVisible('reporter')) {
                 <th
                   (click)="toggleSort('reporter')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Reporter <span class="opacity-50">{{ sortIcon('reporter') }}</span>
                 </th>
@@ -228,7 +344,7 @@
               @if (isColVisible('priority')) {
                 <th
                   (click)="toggleSort('priority')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Priority <span class="opacity-50">{{ sortIcon('priority') }}</span>
                 </th>
@@ -237,7 +353,7 @@
               @if (isColVisible('status')) {
                 <th
                   (click)="toggleSort('status')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Status <span class="opacity-50">{{ sortIcon('status') }}</span>
                 </th>
@@ -246,7 +362,7 @@
               @if (isColVisible('resolution')) {
                 <th
                   (click)="toggleSort('resolution')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Resolution <span class="opacity-50">{{ sortIcon('resolution') }}</span>
                 </th>
@@ -255,16 +371,25 @@
               @if (isColVisible('pts')) {
                 <th
                   (click)="toggleSort('pts')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-center whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-center whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Pts <span class="opacity-50">{{ sortIcon('pts') }}</span>
+                </th>
+              }
+
+              @if (isColVisible('time')) {
+                <th
+                  (click)="toggleSort('time')"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
+                >
+                  Time <span class="opacity-50">{{ sortIcon('time') }}</span>
                 </th>
               }
 
               @if (isColVisible('created')) {
                 <th
                   (click)="toggleSort('created')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Created <span class="opacity-50">{{ sortIcon('created') }}</span>
                 </th>
@@ -273,7 +398,7 @@
               @if (isColVisible('updated')) {
                 <th
                   (click)="toggleSort('updated')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Updated <span class="opacity-50">{{ sortIcon('updated') }}</span>
                 </th>
@@ -282,7 +407,7 @@
               @if (isColVisible('space')) {
                 <th
                   (click)="toggleSort('space')"
-                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border cursor-pointer select-none hover:text-qb-text transition-colors"
+                  class="text-xs tracking-widest uppercase text-qb-muted font-medium px-3 py-2 text-left whitespace-nowrap border-b border-qb-border bg-qb-surface cursor-pointer select-none hover:text-qb-text transition-colors"
                 >
                   Space <span class="opacity-50">{{ sortIcon('space') }}</span>
                 </th>
@@ -295,26 +420,40 @@
               <tr class="border-b border-qb-border/50 hover:bg-white/5 transition-colors">
 
                 @if (isColVisible('type')) {
-                  <td class="px-3 py-2">
+                  <td class="px-3 py-2 bg-qb-surface">
                     <img [src]="issue.fields.issuetype.iconUrl" [alt]="issue.fields.issuetype.name" class="w-4 h-4" />
                   </td>
                 }
 
-                @if (isColVisible('work')) {
-                  <td class="px-3 py-2 max-w-xs">
-                    <span class="font-mono text-xs text-qb-cyan mr-2">{{ issue.key }}</span>
-                    <span class="truncate">{{ issue.fields.summary }}</span>
+                @if (isColVisible('key')) {
+                  <td class="px-3 py-2 bg-qb-surface whitespace-nowrap">
+                    <span class="flex items-center gap-1.5">
+                      @if (issue.fields.subtasks?.length) {
+                        <button (click)="toggleExpand(issue.id)" class="text-qb-muted hover:text-qb-text transition-colors">
+                          <svg class="w-3 h-3 transition-transform" [class.rotate-90]="expandedIssues().has(issue.id)" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path d="m9 18 6-6-6-6"/>
+                          </svg>
+                        </button>
+                      }
+                      <span class="font-mono text-xs text-qb-cyan">{{ issue.key }}</span>
+                    </span>
+                  </td>
+                }
+
+                @if (isColVisible('summary')) {
+                  <td class="px-3 py-2 bg-qb-surface max-w-sm">
+                    <span class="truncate block">{{ issue.fields.summary }}</span>
                   </td>
                 }
 
                 @if (isColVisible('sprint')) {
-                  <td class="px-3 py-2 text-qb-muted whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface text-qb-muted whitespace-nowrap">
                     {{ issue.fields.customfield_10020?.name ?? '—' }}
                   </td>
                 }
 
                 @if (isColVisible('assignee')) {
-                  <td class="px-3 py-2 whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface whitespace-nowrap">
                     @if (issue.fields.assignee) {
                       <span class="flex items-center gap-1.5">
                         <img [src]="issue.fields.assignee.avatarUrls['24x24']" alt="" class="w-5 h-5 rounded-full" />
@@ -327,7 +466,7 @@
                 }
 
                 @if (isColVisible('reporter')) {
-                  <td class="px-3 py-2 whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface whitespace-nowrap">
                     @if (issue.fields.reporter) {
                       <span class="flex items-center gap-1.5">
                         <img [src]="issue.fields.reporter.avatarUrls['24x24']" alt="" class="w-5 h-5 rounded-full" />
@@ -340,7 +479,7 @@
                 }
 
                 @if (isColVisible('priority')) {
-                  <td class="px-3 py-2 whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface whitespace-nowrap">
                     @if (issue.fields.priority) {
                       <span class="flex items-center gap-1.5">
                         <img [src]="issue.fields.priority.iconUrl" [alt]="issue.fields.priority.name" class="w-4 h-4" />
@@ -353,7 +492,7 @@
                 }
 
                 @if (isColVisible('status')) {
-                  <td class="px-3 py-2 whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface whitespace-nowrap">
                     <span
                       class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
                       [class]="statusClass(issue.fields.status.statusCategory.colorName)"
@@ -364,7 +503,7 @@
                 }
 
                 @if (isColVisible('resolution')) {
-                  <td class="px-3 py-2 whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface whitespace-nowrap">
                     @if (issue.fields.resolution) {
                       {{ issue.fields.resolution.name }}
                     } @else {
@@ -374,7 +513,7 @@
                 }
 
                 @if (isColVisible('pts')) {
-                  <td class="px-3 py-2 text-center">
+                  <td class="px-3 py-2 bg-qb-surface text-center">
                     @if (issue.fields.customfield_10016 !== null) {
                       <span class="text-qb-cyan font-mono text-xs">{{ issue.fields.customfield_10016 }}</span>
                     } @else {
@@ -383,30 +522,140 @@
                   </td>
                 }
 
+                @if (isColVisible('time')) {
+                  <td class="px-3 py-2 bg-qb-surface whitespace-nowrap">
+                    <button
+                      (click)="openLogTime(issue)"
+                      class="flex items-center gap-1.5 text-xs hover:text-qb-text transition-colors group"
+                    >
+                      <svg class="w-3.5 h-3.5 text-qb-muted group-hover:text-qb-cyan transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                      </svg>
+                      @if (issue.fields.timetracking?.timeSpent) {
+                        <span class="text-qb-text">{{ issue.fields.timetracking!.timeSpent }}</span>
+                        @if (issue.fields.timetracking!.originalEstimate) {
+                          <span class="text-qb-muted">/ {{ issue.fields.timetracking!.originalEstimate }}</span>
+                        }
+                      } @else {
+                        <span class="text-qb-muted">—</span>
+                      }
+                    </button>
+                  </td>
+                }
+
                 @if (isColVisible('created')) {
-                  <td class="px-3 py-2 text-qb-muted whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface text-qb-muted whitespace-nowrap">
                     {{ issue.fields.created | date:'MMM d, y' }}
                   </td>
                 }
 
                 @if (isColVisible('updated')) {
-                  <td class="px-3 py-2 text-qb-muted whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface text-qb-muted whitespace-nowrap">
                     {{ issue.fields.updated | date:'MMM d, y' }}
                   </td>
                 }
 
                 @if (isColVisible('space')) {
-                  <td class="px-3 py-2 text-qb-muted whitespace-nowrap">
+                  <td class="px-3 py-2 bg-qb-surface text-qb-muted whitespace-nowrap">
                     {{ issue.fields.project.name }}
                   </td>
                 }
 
               </tr>
+              <!-- Subtask rows -->
+              @if (expandedIssues().has(issue.id) && issue.fields.subtasks?.length) {
+                @for (sub of issue.fields.subtasks; track sub.id) {
+                  <tr class="border-b border-qb-border/30">
+                    @if (isColVisible('type')) {
+                      <td class="px-3 py-1.5 bg-qb-surface">
+                        <img [src]="sub.fields.issuetype.iconUrl" [alt]="sub.fields.issuetype.name" class="w-3.5 h-3.5 ml-2" />
+                      </td>
+                    }
+                    @if (isColVisible('key')) {
+                      <td class="px-3 py-1.5 bg-qb-surface whitespace-nowrap">
+                        <span class="font-mono text-xs text-qb-cyan pl-5">{{ sub.key }}</span>
+                      </td>
+                    }
+                    @if (isColVisible('summary')) {
+                      <td class="px-3 py-1.5 bg-qb-surface max-w-sm">
+                        <span class="truncate block text-xs">{{ sub.fields.summary }}</span>
+                      </td>
+                    }
+                    @if (isColVisible('sprint')) { <td class="bg-qb-surface"></td> }
+                    @if (isColVisible('assignee')) { <td class="bg-qb-surface"></td> }
+                    @if (isColVisible('reporter')) { <td class="bg-qb-surface"></td> }
+                    @if (isColVisible('priority')) {
+                      <td class="px-3 py-1.5 bg-qb-surface whitespace-nowrap">
+                        @if (sub.fields.priority) {
+                          <img [src]="sub.fields.priority.iconUrl" [alt]="sub.fields.priority.name" class="w-3.5 h-3.5" />
+                        }
+                      </td>
+                    }
+                    @if (isColVisible('status')) {
+                      <td class="px-3 py-1.5 bg-qb-surface whitespace-nowrap">
+                        <span
+                          class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium"
+                          [class]="statusClass(sub.fields.status.statusCategory.colorName)"
+                        >
+                          {{ sub.fields.status.name }}
+                        </span>
+                      </td>
+                    }
+                    @if (isColVisible('resolution')) { <td class="bg-qb-surface"></td> }
+                    @if (isColVisible('pts')) { <td class="bg-qb-surface"></td> }
+                    @if (isColVisible('time')) { <td class="bg-qb-surface"></td> }
+                    @if (isColVisible('created')) { <td class="bg-qb-surface"></td> }
+                    @if (isColVisible('updated')) { <td class="bg-qb-surface"></td> }
+                    @if (isColVisible('space')) { <td class="bg-qb-surface"></td> }
+                  </tr>
+                }
+              }
             }
           </tbody>
         </table>
       </div>
     }
   </main>
+
+  <!-- Log Time Modal -->
+  @if (logIssue()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" (click)="closeLogTime()">
+      <div class="qb-surface rounded-xl p-5 w-96 shadow-2xl border border-qb-border" (click)="$event.stopPropagation()">
+        <h3 class="text-sm font-semibold mb-1">Log Time</h3>
+        <p class="text-xs text-qb-muted mb-4">
+          <span class="text-qb-cyan font-mono">{{ logIssue()!.key }}</span> — {{ logIssue()!.fields.summary }}
+        </p>
+        @if (logIssue()!.fields.timetracking?.timeSpent) {
+          <p class="text-xs text-qb-muted mb-3">
+            Already logged: <span class="text-qb-text">{{ logIssue()!.fields.timetracking!.timeSpent }}</span>
+            @if (logIssue()!.fields.timetracking!.originalEstimate) {
+              / {{ logIssue()!.fields.timetracking!.originalEstimate }}
+            }
+          </p>
+        }
+        <label class="block text-xs text-qb-muted mb-1">Time spent (e.g. 2h, 30m, 1d 4h)</label>
+        <input
+          type="text"
+          class="input-cyber w-full rounded px-3 py-2 text-sm mb-4"
+          placeholder="1h 30m"
+          [ngModel]="logTimeValue()"
+          (ngModelChange)="logTimeValue.set($event)"
+          (keydown.enter)="submitLogTime()"
+        />
+        <div class="flex justify-end gap-2">
+          <button (click)="closeLogTime()" class="px-3 py-1.5 text-sm text-qb-muted hover:text-qb-text transition-colors">
+            Cancel
+          </button>
+          <button
+            (click)="submitLogTime()"
+            [disabled]="logSaving() || !logTimeValue().trim()"
+            class="btn-cyber px-4 py-1.5 text-sm text-white rounded font-medium"
+          >
+            {{ logSaving() ? 'Saving…' : 'Log Time' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
 </div>
